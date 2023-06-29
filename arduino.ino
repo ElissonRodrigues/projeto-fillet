@@ -1,35 +1,25 @@
-/* Pins used for control signals */
-#define ENABLE 8
-#define DIRECTION 9
-#define STEP 10
+/// Inclua a biblioteca Stepper
+#include <Stepper.h>
 
-#define FORWARD HIGH
-#define REVERSE LOW
+// Velocidade Minima 10
+// Velocidade Máxima 700
 
-/* Change this values to alter the clock speed */
-#define SPEED 1
+// Define o número de passos por revolução do motor
+const int passosPorRevolucao = 360;
 
-void setup() 
-{
-  pinMode(ENABLE, OUTPUT);
-  pinMode(DIRECTION, OUTPUT);
-  pinMode(STEP, OUTPUT);
+// Cria um objeto Stepper
+// Parâmetros: número de passos por revolução, pino de controle 1, pino de controle 2
+Stepper motor(passosPorRevolucao, 13, 12);
 
-  /* Pull the enable pin low to enable the driver */
-  digitalWrite(ENABLE, LOW);
+// Define a velocidade inicial do motor (em RPM)
+const int velocidadeInicial = 700;
+
+void setup() {
+  // Define a velocidade do motor (em RPM)
+  motor.setSpeed(velocidadeInicial);
 }
 
-
-void loop() 
-{
-  /* The the rotational direction to the forward direction */
-  digitalWrite(DIRECTION, REVERSE);
-
-  /* Keep stepping the motor in an infinite loop */
-  while(1)
-  {
-    digitalWrite(STEP, HIGH);                 
-    digitalWrite(STEP, LOW);    
-    delay(SPEED);            
-  }
+void loop() {
+  // Faz o motor girar uma volta no sentido horário
+  motor.step(passosPorRevolucao);
 }
