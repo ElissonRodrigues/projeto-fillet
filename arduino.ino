@@ -1,25 +1,72 @@
-/// Inclua a biblioteca Stepper
 #include <Stepper.h>
+#include <IRremote.h>
+#include <EEPROM.h> // Inclui a biblioteca EEPROM
 
-// Velocidade Minima 10
-// Velocidade Máxima 700
+// definir pinos do arduino
+#define PinSDriver 12 // Pino "S" do Adaptador do Driver
+#define PinDDriver 13 // Pino "D" do Adaptador do Driver
 
-// Define o número de passos por revolução do motor
+#define PinIRRemote 2 // Pino de sinal do Modulo KY-022
+#define saltosDeVelocidade 30 //Define qual será o salto toda vez que precionar o botão "+" ou "-"
+
+//Motor Stepper
 const int passosPorRevolucao = 360;
+Stepper motor(passosPorRevolucao, PinDDriver, PinSDriver);
 
-// Cria um objeto Stepper
-// Parâmetros: número de passos por revolução, pino de controle 1, pino de controle 2
-Stepper motor(passosPorRevolucao, 13, 12);
+//Velocidades do Motor
+const int velocidadeMinima = 18;
+const int velocidadeMaxima = 700;
+int velocidadeAtual = 0;
 
-// Define a velocidade inicial do motor (em RPM)
-const int velocidadeInicial = 700;
+IRrecv receptorIR(PinIRRemote); // Pino conectado ao receptor IR
+decode_results resultadosIR;
 
 void setup() {
-  // Define a velocidade do motor (em RPM)
-  motor.setSpeed(velocidadeInicial);
+  motor.setSpeed(velocidadeAtual);
+  receptorIR.enableIRIn(); // Inicializa o receptor IR
+  Serial.begin(19200);
+
+  // Carrega a velocidade salva na EEPROM
+  velocidadeAtual = EEPROM.read(0); // Lê o valor da posição 0 da EEPROM
+
+  // Se o valor lido for inválido, define a velocidade máxima como padrão
+  if (velocidadeAtual < velocidadeMinima || velocidadeAtual > velocidadeMaxima) {
+    velocidadeAtual = velocidadeMaxima;
+  }
+
+  motor.setSpeed(velocidadeAtual);
 }
 
 void loop() {
-  // Faz o motor girar uma volta no sentido horário
+  Serial.print("Velocidade atual do Motor: ");
+  Serial.println(velocidadeAtual);
+  
+  if (receptorIR.decode(&resultadosIR)) {
+    // Verifica se um código do controle remoto foi recebido
+
+    if (resultadosIR.value == 16754775) {
+      // Código correspondente a "VOL+"
+      velocidadeAtual += saltosDeVelocidade;
+    }
+    else if (resultadosIR.value == 16769055) {
+      // Código correspondente a "VOL-"
+      velocidadeAtual -= saltosDeVelocidade;
+    }
+
+    // Limita a velocidade dentro do intervalo definido
+    if (velocidadeAtual < velocidadeMinima) {
+      velocidadeAtual = velocidadeMinima;
+    } else if (velocidadeAtual > velocidadeMaxima) {
+      velocidadeAtual = velocidadeMaxima;
+    }
+
+    motor.setSpeed(velocidadeAtual); // Atualiza a velocidade do motor
+    receptorIR.resume(); // Continua aguardando sinais do controle remoto
+  }
+
   motor.step(passosPorRevolucao);
+
+  // Salva a velocidade atual na EEPROM
+  EEPROM.write(0, velocidadeAtual); // Escreve o valor da velocidade atual na posição 0 da EEPROM
 }
+
