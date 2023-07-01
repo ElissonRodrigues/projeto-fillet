@@ -11,9 +11,6 @@ const int PinControlMosfet = 6; // Pino de controle do módulo MOSFET
 
 #define saltosDeVelocidade 30 // Define qual será o salto toda vez que pressionar o botão "+" ou "-"
 
-//Pino Sinal termistor
-const int pinSensorTemp = A0;
-
 // Motor Stepper
 const int passosPorRevolucao = 360;
 Stepper motor(passosPorRevolucao, PinDDriver, PinSDriver);
