@@ -25,7 +25,7 @@ decode_results resultadosIR;
 
 // Controle de Temperatura
 const int pinSensorTemp = A0; // Pino do sensor de temperatura
-const float setpointTemp = 25.0; // Temperatura desejada
+float setpointTemp = 25.0; // Temperatura desejada
 const float kp = 0.09;
 const float ki = 1;
 const float kd = 8;
@@ -34,10 +34,14 @@ const int period = 100; // Frequência de atualização do controle em milissegu
 float error_previo = 0;
 float integral = 0;
 
+// Definir os códigos do controle remoto para os botões "Prev" e "Next"
+const unsigned long codigoBotaoPrev = 0x12345678; // Substitua pelo código real do controle para o botão "Prev"
+const unsigned long codigoBotaoNext = 0x87654321; // Substitua pelo código real do controle para o botão "Next"
+
 void setup() {
   motor.setSpeed(velocidadeAtual);
   receptorIR.enableIRIn(); // Inicializa o receptor IR
-  Serial.begin(19200);
+  Serial.begin(9600);
 
   pinMode(PinControlMosfet, OUTPUT); // Define o pino de controle do módulo MOSFET como saída
 
@@ -56,13 +60,30 @@ void loop() {
   Serial.print("Velocidade atual do Motor: ");
   Serial.println(velocidadeAtual);
 
+  Serial.print("Botão Pressionado: ");
+  Serial.println(resultadosIR.value);
+
   // Verifica se um código do controle remoto foi recebido
   if (receptorIR.decode(&resultadosIR)) {
+    // Verifica se o código recebido corresponde ao botão "Prev"
+    if (resultadosIR.value == codigoBotaoPrev) {
+      // Reduzir a temperatura desejada
+      setpointTemp--;
+    }
 
+    // HOTEND (EXTRUSORA)
+    // Verifica se o código recebido corresponde ao botão "Next"
+    else if (resultadosIR.value == codigoBotaoNext) {
+      // Aumentar a temperatura desejada
+      setpointTemp++;
+    }
+    // Atualizar a velocidade do motor conforme os botões "Prev" e "Next"
     if (resultadosIR.value == 16754775) {
       // Código correspondente a "VOL+"
       velocidadeAtual += saltosDeVelocidade;
     }
+
+    //MOTOR DE PASSSO (STEPPER NEMA17)
     else if (resultadosIR.value == 16769055) {
       // Código correspondente a "VOL-"
       velocidadeAtual -= saltosDeVelocidade;
@@ -75,9 +96,14 @@ void loop() {
       velocidadeAtual = velocidadeMaxima;
     }
 
-    motor.setSpeed(velocidadeAtual); // Atualiza a velocidade do motor
-    receptorIR.resume(); // Continua aguardando sinais do controle remoto
+    receptorIR.resume();
   }
+
+  // Exibir a temperatura desejada no monitor serial
+  Serial.print("Temperatura desejada: ");
+  Serial.println(setpointTemp);
+
+  motor.setSpeed(velocidadeAtual); // Atualiza a velocidade do motor
 
   motor.step(passosPorRevolucao);
 
