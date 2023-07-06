@@ -18,7 +18,7 @@ Stepper motor(passosPorRevolucao, 12, 13);
 long posicao_atual_M = 0;
 long posicao_antiga_M = 0;
 int velocidade = 700;
-int intervalo_M = 800 / velocidade;
+int intervalo_M = 1000 / velocidade;
 long posicao_anterior_M = 0;
 unsigned long tempo_anterior_M = 0;
 
@@ -26,7 +26,7 @@ long posicao_atual_E = 0;
 long posicao_antiga_E = 0;
 int temperatura = 1;
 int temp_atual = 0;
-int intervalo_E = 800 / temperatura;
+int intervalo_E = 1000 / temperatura;
 long posicao_anterior_E = 0;
 unsigned long tempo_anterior_E = 0;
 
