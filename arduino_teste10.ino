@@ -144,8 +144,10 @@ void LCDVel() {
   lcd.print("> VEL: ");
   lcd.print(velocidade);
   lcd.setCursor(0, 1);
-  lcd.print(" TEMP: ");
+  lcd.print(" T: ");
   lcd.print(temp_atual);
+  lcd.print(" -> ");
+  lcd.print(temperatura);
   lcd.write(byte(0));
   lcd.print("C");
 }
@@ -156,8 +158,10 @@ void LCDTemp() {
   lcd.print("  VEL: ");
   lcd.print(velocidade);
   lcd.setCursor(0, 1);
-  lcd.print(">TEMP: ");
-  lcd.print(temp_atual);
+  lcd.print(">T: ");
+  lcd.print(temp_atual); 
+  lcd.print(" -> ");
+  lcd.print(temperatura);
   lcd.write(byte(0));
   lcd.print("C");
 }
@@ -182,7 +186,7 @@ int alterandoVel() {
 }
 
 int alterandoTemp() {
-  if (encoder_temp_atual != posicao_anterior_E) {
+  if (posicao_atual_E != posicao_anterior_E) {
     // Se a posição atual for maior que a anterior, significa que o encoder rotativo girou no sentido horário
     if (posicao_atual_E > posicao_anterior_E) {
       temperatura += 10; // Aumenta a velocidade do motor em 10 passos por segundo
