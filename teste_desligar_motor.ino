@@ -10,6 +10,7 @@
 
 bool mudandoVEL = true;
 bool mudandoTEMP = false;
+bool mudandoMOTOR = false;
 bool motorLigado = true;
 
 Encoder r(CLK, DT);
@@ -62,8 +63,10 @@ void loop() {
       LCDTemp();
     } else if (mudandoTEMP) {
       mudandoTEMP = false;
+      mudandoMOTOR = true;
       LCDMotor();
-    } else {
+    } else if (mudandoMOTOR) {
+      mudandoMOTOR = false;
       mudandoVEL = true;
       LCDVel();
     }
@@ -82,12 +85,15 @@ void loop() {
       temperatura = alterandoParametro(posicao_atual_E, posicao_antiga_E, temperatura, intervalo_E, 10, 300);
       LCDTemp(); // Atualiza o display LCD somente quando a posição do encoder muda
     }
-  } else {
+  } else if (mudandoMOTOR) {
     posicao_atual_M = r.read();
-    if (posicao_atual_M != posicao_antiga_M) {
-      mudarStatusMotor(posicao_atual_M);
-      LCDMotor();
+    if (posicao_atual_M > posicao_antiga_M) {
+      motorLigado = true;
+    } else if (posicao_atual_M < posicao_antiga_M) {
+      motorLigado = false;
     }
+    posicao_antiga_M = posicao_atual_M;
+    LCDMotor();
   }
 
   if (motorLigado) {
@@ -142,13 +148,4 @@ int alterandoParametro(long posicao_atual, long &posicao_anterior, int parametro
     posicao_anterior = posicao_atual;
   }
   return parametro;
-}
-
-void mudarStatusMotor(long posicao_atual) {
-  if (posicao_atual > posicao_anterior_M) {
-    motorLigado = true;
-  } else if (posicao_atual < posicao_anterior_M) {
-    motorLigado = false;
-  }
-  posicao_anterior_M = posicao_atual;
 }
