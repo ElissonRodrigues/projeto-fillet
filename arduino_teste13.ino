@@ -11,22 +11,22 @@
 bool mudandoVEL = true;
 bool mudandoTEMP = false;
 
-Encoder r(CLK,DT);
+Encoder r(CLK, DT);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Stepper motor(passosPorRevolucao, 12, 13);
 
 long posicao_atual_M = 0;
 long posicao_antiga_M = 0;
 int velocidade = 700;
-int intervalo_M = 1000 / velocidade;
+int intervalo_M = 1000;
 long posicao_anterior_M = 0;
 unsigned long tempo_anterior_M = 0;
 
 long posicao_atual_E = 0;
 long posicao_antiga_E = 0;
-int temperatura = 1;
+int temperatura = 0;
 int temp_atual = 0;
-int intervalo_E = 1000 / temperatura;
+int intervalo_E = 1000;
 long posicao_anterior_E = 0;
 unsigned long tempo_anterior_E = 0;
 
@@ -53,12 +53,13 @@ void setup() {
 
 void loop() {
   int estadoDoBotao = digitalRead(SW);
-  
+
   if (estadoDoBotao != 1) {
     mudandoVEL = !mudandoVEL;
     mudandoTEMP = !mudandoTEMP;
     if (mudandoVEL) {
       LCDVel();
+
     } else {
       LCDTemp();
     }
@@ -68,13 +69,13 @@ void loop() {
   if (mudandoVEL) {
     posicao_atual_M = r.read();
     if (posicao_atual_M != posicao_antiga_M) {
-      velocidade = alterandoParametro(posicao_atual_M, posicao_antiga_M, velocidade, intervalo_M, 10, 1100); 
+      velocidade = alterandoParametro(posicao_atual_M, posicao_antiga_M, velocidade, intervalo_M, 16, 1100);
       LCDVel(); // Atualiza o display LCD somente quando a posição do encoder muda
     }
   } else {
     posicao_atual_E = r.read();
     if (posicao_atual_E != posicao_antiga_E) {
-      temperatura = alterandoParametro(posicao_atual_E, posicao_antiga_E, temperatura, intervalo_E, 10, 300);
+      temperatura = alterandoParametro(posicao_atual_E, posicao_antiga_E, temperatura, intervalo_E, 5, 300);
       LCDTemp(); // Atualiza o display LCD somente quando a posição do encoder muda
     }
   }
