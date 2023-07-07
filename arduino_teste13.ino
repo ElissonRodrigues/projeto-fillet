@@ -112,7 +112,7 @@ void LCDTemp() {
 
 int alterandoParametro(long posicao_atual, long& posicao_anterior, int parametro, int& intervalo, int passo, int limite) {
   if (posicao_atual != posicao_anterior) {
-    parametro = constrain(parametro + (posicao_atual > posicao_anterior ? passo : -passo), 0, limite);
+    parametro = constrain(parametro - (posicao_atual > posicao_anterior ? passo : -passo), 0, limite);
     intervalo = 2000 / parametro;
     posicao_anterior = posicao_atual;
   }
