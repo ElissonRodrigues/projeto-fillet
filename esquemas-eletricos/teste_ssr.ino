@@ -1,3 +1,5 @@
+#include <PID_v1.h>
+
 // Definir o pino do termistor
 #define TERMISTOR_PIN A2
 
@@ -8,9 +10,6 @@
 
 // Definir a resistência do divisor de tensão em ohms
 #define R_DIV 10000
-
-// Definir o número de amostras para a média móvel
-#define N_SAMPLES 10
 
 // Definir o pino do SSR
 #define SSR_PIN 3
@@ -23,12 +22,19 @@
 #define KI 5
 #define KD 1
 
+double input, output, setpoint;
+PID myPID(&input, &output, &setpoint, KP, KI, KD, DIRECT);
+
 void setup() {
   // Inicializar a comunicação serial com 9600 baud
   Serial.begin(9600);
   
   // Configurar o pino do SSR como saída
   pinMode(SSR_PIN, OUTPUT);
+  
+  // Inicializar o controlador PID
+  setpoint = TARGET_TEMP;
+  myPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
@@ -45,38 +51,19 @@ void loop() {
   float t = 1.0 / (1.0 / T0 + log(r / R0) / B);
   
   // Converter a temperatura para °C
-  float c = t - 273.15;
+  input = t - 273.15;
   
-  // Aplicar uma média móvel para suavizar a leitura
-  static float c_avg = c; // valor médio inicializado com a primeira leitura
-  c_avg = (c_avg * (N_SAMPLES - 1) + c) / N_SAMPLES; // atualizar o valor médio com a nova leitura
+  // Executar o controlador PID
+  myPID.Compute();
+  
+  // Controlar a hotend usando o SSR e o valor de saída do controlador PID
+    // Controlar a hotend usando o SSR e o valor de saída do controlador PID
+  analogWrite(SSR_PIN, output);
   
   // Printar a temperatura em °C no monitor Serial com uma casa decimal
   Serial.print("Temperatura: ");
-  Serial.print(c_avg, 1);
+  Serial.print(input, 1);
   Serial.println(" C");
-  
-  // Controlar a hotend usando o SSR e um controlador PID
-  static float integral = 0;
-  static float previous_error = TARGET_TEMP - c_avg;
-  
-  float error = TARGET_TEMP - c_avg;
-  
-  integral += error;
-  
-  float derivative = error - previous_error;
-  
-    float output = KP * error + KI * integral + KD * derivative;
-  
-  if (output > 255) {
-    output = 255;
-  } else if (output < 0) {
-    output = 0;
-  }
-  
-  analogWrite(SSR_PIN, output);
-  
-  previous_error = error;
   
   // Aguardar um intervalo de tempo
   delay(500);
