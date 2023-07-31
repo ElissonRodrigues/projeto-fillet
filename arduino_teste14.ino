@@ -140,6 +140,7 @@ void loop() {
   myPID.Compute();
   // Lê a temperatura atual do sensor
   temp_atual = c_avg;
+  /*
   Serial.print("Temperatura: ");
   Serial.print(temp_atual);
   Serial.println(" ºC");
@@ -147,8 +148,9 @@ void loop() {
   Serial.println(output);
 
   Serial.println(temp_atual);
-  
+  */
   analogWrite(HEATER_PIN, output);
+  
 }
 
 void LCDVel() {
