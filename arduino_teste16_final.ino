@@ -60,7 +60,7 @@ byte graus[8] = {
 #define N_SAMPLES 10
 
 // Define as variáveis para o sensor de temperatura e o elemento de aquecimento
-#define HEATER_PIN 7
+#define HEATER_PIN 6
 
 // Define os parâmetros do controlador PID
 #define KP 5
