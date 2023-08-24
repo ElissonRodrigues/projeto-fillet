@@ -128,9 +128,9 @@ void loop() {
   if(velocidade > vel_inicial_motor){
     motor.setSpeed(velocidade);
     motor.step(passosPorRevolucao);
-    digitalWrite(HIGH);
+    digitalWrite(pin_cooler, HIGH);
   } else {
-    digitalWrite(LOW);
+    digitalWrite(pin_cooler, LOW);
   }
   
   int adc = analogRead(TERMISTOR_PIN);
