@@ -28,7 +28,7 @@ unsigned long tempo_anterior_M = 0;
 
 long posicao_atual_E = 0;
 long posicao_antiga_E = 0;
-int temperatura = 0;
+int temperatura = 150;
 int temp_atual = 0;
 int intervalo_E = 1000;
 long posicao_anterior_E = 0;
@@ -63,9 +63,9 @@ byte graus[8] = {
 #define HEATER_PIN 6
 
 // Define os parâmetros do controlador PID
-#define KP 6
-#define KI 0.1
-#define KD 0.05
+#define KP 25
+#define KI 14
+#define KD 14
 
 
 
@@ -74,14 +74,12 @@ double input, output, setpoint;
 PID myPID(&input, &output, &setpoint, KP, KI, KD, DIRECT);
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   lcd.init();
   lcd.createChar(0, graus);
   lcd.print("PROJETO FILLET");
   pinMode(SW, INPUT_PULLUP);
-  motor.setSpeed(0);
-  motor.step(0);
-  
+
   // Initialize the sensor of temperature and the heating element
   pinMode(TERMISTOR_PIN, INPUT);
   pinMode(HEATER_PIN, OUTPUT);
@@ -146,18 +144,18 @@ void loop() {
   // Lê a temperatura atual do sensor
   temp_atual = c_avg;
   input = temp_atual;
-
-  if(output > 200){
-    output -= 6-0,005;
-  }
-  
   /*
+  if(output > 200){
+    output -= 65;
+  }*/
+  
+
   Serial.print("Temperatura: ");
   Serial.print(temp_atual);
   Serial.println(" ºC");
   Serial.print("PID: ");
   Serial.println(output);
-  */
+
 
   analogWrite(HEATER_PIN, output);
 
