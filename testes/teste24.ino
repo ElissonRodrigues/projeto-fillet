@@ -12,10 +12,10 @@
 #define SW 4
 
 #define passosPorRevolucao 240
-#define estadoMotor false
 
 bool mudandoVEL = true;
 bool mudandoTEMP = false;
+bool estadoMotor = false;
 
 Encoder r(CLK, DT);
 hd44780_I2Cexp lcd(0x27, 16, 2);
@@ -23,7 +23,7 @@ Stepper motor(passosPorRevolucao, 12, 13);
 
 long posicao_atual_M = 0;
 long posicao_antiga_M = 0;
-int velocidade = 0;
+int velocidade = 750;
 int vel_inicial_motor = 400;
 int intervalo_M = 1000;
 long posicao_anterior_M = 0;
@@ -80,6 +80,12 @@ unsigned long previousMillis = 0;  // Armazena o valor de millis() na última ex
 const long interval = 2000;        // Intervalo desejado em milissegundos (2 segundos)
 
 
+
+
+unsigned long lastEncoderChangeTime = 0;
+unsigned long debounceDelay = 100; // Ajuste este valor conforme necessário
+
+
 void setup() {
   Serial.begin(9600);
   lcd.init();
@@ -104,7 +110,7 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     // Atualiza o visor
     if(mudandoVEL) {
-        LCDVel();
+      LCDVel();
     } else {
       LCDTemp();
     }
@@ -120,7 +126,7 @@ void loop() {
     mudandoVEL = !mudandoVEL;
     mudandoTEMP = !mudandoTEMP;
     if(mudandoVEL) {
-        LCDVel();
+      LCDVel();
     } else {
       LCDTemp();
     }
@@ -128,13 +134,13 @@ void loop() {
   }
 
   if (mudandoVEL) {
-   if(estadoMotor) {
-    estadoMotor == false;
-   } else {
-    estadoMotor == true;
-   }
-   LCDTemp();
-
+    posicao_atual_M = r.read();
+    int limite_tolerancia = 15; // Ajuste esse valor de acordo com sua necessidade
+    if (abs(posicao_atual_M - posicao_antiga_M) > limite_tolerancia) {
+      velocidade = alterandoParametro(posicao_atual_M, posicao_antiga_M, velocidade, intervalo_M, 16, 1100);
+      estadoMotor = !estadoMotor;
+      LCDVel(); // Atualiza o display LCD somente quando a posição do encoder muda
+    }
   } else {
     posicao_atual_E = r.read();
     if (posicao_atual_E != posicao_antiga_E) {
@@ -143,7 +149,7 @@ void loop() {
     }
   }
 
-  if(velocidade > vel_inicial_motor){
+  if(estadoMotor){
     motor.setSpeed(velocidade);
     motor.step(passosPorRevolucao);
     digitalWrite(pin_cooler, HIGH);
