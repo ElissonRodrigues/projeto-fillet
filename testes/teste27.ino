@@ -63,12 +63,16 @@ byte graus[8] = {
 #define N_SAMPLES 10
 
 // Define as variáveis para o sensor de temperatura e o elemento de aquecimento
-#define HEATER_PIN 6
+#define PIN_MOSFET 6
 
 // Define os parâmetros do controlador PID
 #define KP 25
 #define KI 14
 #define KD 14
+
+//PINOS DOS LEDS
+#define pin_led_verde 9
+#define pin_led_vermelho 10
 
 double input, output, setpoint;
 // Cria uma instância do controlador PID
@@ -80,9 +84,6 @@ const long interval = 2000;  // Intervalo desejado em milissegundos (2 segundos)
 unsigned long lastEncoderChangeTime = 0;
 unsigned long debounceDelay = 100; // Ajuste este valor conforme necessário
 
-#define pin_led_verde 9
-#define pin_led_vermelho 10
-
 void setup() {
   Serial.begin(9600);
   lcd.init();
@@ -91,7 +92,7 @@ void setup() {
   pinMode(SW, INPUT_PULLUP);
 
   // inicializa o sensor de temperatura e o elemento de aquecimento     pinMode(TERMISTOR_PIN, INPUT);
-  pinMode(HEATER_PIN, OUTPUT);
+  pinMode(PIN_MOSFET, OUTPUT);
   
   // Ativa o controle do PID
   myPID.SetMode(AUTOMATIC);
@@ -177,7 +178,7 @@ void loop() {
   input = temp_atual;
 
   // Output é o valor do PID
-  analogWrite(HEATER_PIN, output);
+  analogWrite(PIN_MOSFET, output);
 
   if(temp_atual > 35) {
     digitalWrite(pin_led_vermelho, HIGH);
