@@ -1,2 +1,0 @@
-#9 - Como identificar fios e ligar motores de passo 4,5 ou 6 fios nos Drivers A4988/DRV8825
-https://www.youtube.com/watch?v=t113ln3DiJM
